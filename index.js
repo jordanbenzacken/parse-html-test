@@ -1,5 +1,6 @@
 const fs = require('fs')
 const { promisify } = require('util')
+const cheerio = require('cheerio')
 
 //transform callback in promise
 const writeFile = promisify(fs.writeFile)
@@ -14,6 +15,7 @@ const onError = (e, functionName) => {
 const processHtmlTest = async (data) => {
     try {
         result['status'] = 'ok'
+        const $ = cheerio.load(data)
         return result
     }
     catch (e) {
