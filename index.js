@@ -5,16 +5,16 @@ const cheerio = require('cheerio')
 //transform callback in promise
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
-const result = {}
+let status = 'ok'
 
 const onError = (e, functionName) => {
-    result['status'] = 'error : ' + e
+    status = 'error'
     console.error(functionName + ' : ' + e)
 }
 
 const processHtmlTest = async (data) => {
     try {
-        result['status'] = 'ok'
+        const result = {}
         const $ = cheerio.load(data)
         return result
     }
@@ -42,9 +42,14 @@ const writeJsonResult = async (dataString) => {
 }
 
 const app = async () => {
-    const testHtml = await readTestHtml()
-    const dataParsed = await processHtmlTest(testHtml)
-    await writeJsonResult(JSON.stringify(dataParsed, null, 3))
+    let dataParsed = {}
+    try {
+        const testHtml = await readTestHtml()
+        dataParsed = await processHtmlTest(testHtml)
+    } catch (e) {
+        console.error(e)
+    }
+    await writeJsonResult(JSON.stringify({ status, ...dataParsed }, null, 3))
 }
 
 app()
