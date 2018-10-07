@@ -18,7 +18,7 @@ const onError = (e, functionName) => {
 }
 
 const getMainInfos = ($) => {
-    const firstPrimaryLink = $('.primary-link').first()
+    const firstPrimaryLink = $('.primary-link').first() //the HTML structure suggests one code by mail, so one trip by mail (can be easilu adapted if not)
     const urlPrimary = firstPrimaryLink.attr('href')
     const queryData = url.parse(urlPrimary).query
     const queryParsed = queryString.parse(queryData)
@@ -44,7 +44,11 @@ const computeCustomPrice = (target, custom) => {
     }
 }
 
-const getRoundTrips = ($) => {
+const computeTotalPrice = (prices = {}) => {
+    return prices.reduce((acc, curr) => acc + curr.value, 0) //sum
+}
+
+const getRoundTripsInfo = ($) => {
     const firstProductHeader = $('.product-header').first()
     const roundTrips = [] //cound have been map reduce, better readability
     const custom = { prices: [] }
@@ -73,7 +77,8 @@ const getRoundTrips = ($) => {
             roundTrips[roundTrips.length - 1]['trains'] = [train]
         }
     })
-    return { roundTrips, custom }
+    const totalPrice = computeTotalPrice(custom.prices)
+    return { price: totalPrice, roundTrips, custom }
 }
 
 const processHtmlTest = async (data) => {
@@ -81,8 +86,8 @@ const processHtmlTest = async (data) => {
         dataNoEscape = data.replace(/\\"/g, '"')
         const $ = cheerio.load(dataNoEscape)
         const { name, code } = getMainInfos($)
-        const { roundTrips, custom } = getRoundTrips($)
-        const details = { roundTrips }
+        const { roundTrips, custom, price } = getRoundTripsInfo($)
+        const details = { price, roundTrips }
         const result = { trips: [{ code, name, details }], custom }
         return { result }
     }

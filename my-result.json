@@ -6,6 +6,7 @@
         "code": "SNIKXP",
         "name": "dupont",
         "details": {
+          "price": 768.5,
           "roundTrips": [
             {
               "type": "Aller",
