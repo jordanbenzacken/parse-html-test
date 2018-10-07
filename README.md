@@ -1,3 +1,10 @@
+# Run
+
+git clone ...
+npm i
+npm start
+open my-result.json
+
 # parse-html-test
 
 1 objet :
