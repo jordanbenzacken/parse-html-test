@@ -1,5 +1,6 @@
 const { onError } = require('../../utils/error')
 const { tryToGet, queryParser } = require('../../utils/dom')
+const moment = require('moment')
 
 const computeCustomPrice = (target, custom) => {
     try {
@@ -17,6 +18,7 @@ const getRoundTripsInfo = ($) => {
     const firstProductHeader = $('.product-header').first()
     const roundTrips = [] //cound have been map reduce, better readability
     const custom = { prices: [] }
+    const transactionDate = getTransactionDate($)
     computeCustomPrice(firstProductHeader, custom)
     firstProductHeader.siblings().map((i, sibling) => { //brute force processing due to poor HTML structure :-(
         const element = $(sibling)
@@ -27,7 +29,13 @@ const getRoundTripsInfo = ($) => {
         }
         target = tryToGet(element, 'product-travel-date') //will be a new roundtrip then
         if (target) {
-            roundTrips.push({})
+            //compute real date (supposing we do not buy ticket more than 1 year before departure)
+            const date = moment.utc(target.html().trim(), 'D MMMM')
+            date.year(transactionDate.year())
+            if (date.isBefore(transactionDate)) {
+                date.add(1, 'year')
+            }
+            roundTrips.push({ date: date.utc().format('YYYY-MM-DD HH:mm:ss.ZZ').replace('+', '') })
         }
         target = tryToGet(element, 'product-details') //get a train
         if (target) {
@@ -51,6 +59,13 @@ const getMainInfos = ($) => {
     const urlPrimary = firstPrimaryLink.attr('href')
     const queryParsed = queryParser(urlPrimary)
     return { name: queryParsed.ownerName, code: queryParsed.pnrRef }
+}
+
+const getTransactionDate = ($) => {
+    const node = $('td:contains(" Date de la transaction ")').last().next()
+    let rawDate = node.html()
+    rawDate = rawDate.substring(0, rawDate.indexOf('(')).trim()
+    return moment(rawDate, 'DD Mo YYYY')
 }
 
 const processSncfTest = async ($) => {
