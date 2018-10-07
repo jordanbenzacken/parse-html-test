@@ -1,0 +1,4 @@
+# notes
+
+    Réserves sur passengers
+    format UTC moment Z date
