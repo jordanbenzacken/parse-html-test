@@ -14,3 +14,7 @@
                     *trains (array)
         *custom
             *prices (array)
+
+
+            Réserves sur passengers
+            format UTC moment Z date
