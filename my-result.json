@@ -1,51 +1,80 @@
 {
- "status": "ok",
- "result": {
-  "trips": [
-   {
-    "code": "SNIKXP",
-    "name": "dupont",
-    "details": {
-     "roundTrips": [
+  "status": "ok",
+  "result": {
+    "trips": [
       {
-       "type": "Aller",
-       "trains": [
-        {
-         "departureTime": "16:57",
-         "departureStation": "PARIS GARE DE LYON"
+        "code": "SNIKXP",
+        "name": "dupont",
+        "details": {
+          "roundTrips": [
+            {
+              "type": "Aller",
+              "trains": [
+                {
+                  "departureTime": "16:57",
+                  "departureStation": "PARIS GARE DE LYON",
+                  "arrivalTime": "18:56",
+                  "arrivalStation": "LYON PART DIEU",
+                  "type": "TGV",
+                  "number": "6687"
+                }
+              ]
+            },
+            {
+              "type": "Retour",
+              "trains": [
+                {
+                  "departureTime": "13:05",
+                  "departureStation": "LYON PART DIEU",
+                  "arrivalTime": "15:01",
+                  "arrivalStation": "PARIS GARE DE LYON",
+                  "type": "TGV",
+                  "number": "6618"
+                }
+              ]
+            },
+            {
+              "type": "Aller",
+              "trains": [
+                {
+                  "departureTime": "16:37",
+                  "departureStation": "PARIS GARE DE LYON",
+                  "arrivalTime": "19:17",
+                  "arrivalStation": "AVIGNON TGV",
+                  "type": "TGV",
+                  "number": "6121"
+                }
+              ]
+            },
+            {
+              "type": "Retour",
+              "trains": [
+                {
+                  "departureTime": "15:42",
+                  "departureStation": "AVIGNON TGV",
+                  "arrivalTime": "18:30",
+                  "arrivalStation": "PARIS GARE DE LYON",
+                  "type": "TGV",
+                  "number": "6122"
+                }
+              ]
+            }
+          ]
         }
-       ]
-      },
-      {
-       "type": "Retour",
-       "trains": [
-        {
-         "departureTime": "13:05",
-         "departureStation": "LYON PART DIEU"
-        }
-       ]
-      },
-      {
-       "type": "Aller",
-       "trains": [
-        {
-         "departureTime": "16:37",
-         "departureStation": "PARIS GARE DE LYON"
-        }
-       ]
-      },
-      {
-       "type": "Retour",
-       "trains": [
-        {
-         "departureTime": "15:42",
-         "departureStation": "AVIGNON TGV"
-        }
-       ]
       }
-     ]
+    ],
+    "custom": {
+      "prices": [
+        {
+          "value": 315.5
+        },
+        {
+          "value": 378
+        },
+        {
+          "value": 75
+        }
+      ]
     }
-   }
-  ]
- }
+  }
 }

@@ -4,10 +4,12 @@ const cheerio = require('cheerio')
 const url = require('url')
 const queryString = require('query-string');
 
-
 //transform callback in promise
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
+
+
+//status
 let status = 'ok'
 
 const onError = (e, functionName) => {
@@ -34,27 +36,44 @@ const tryToGet = (element, selector) => {
     return false
 }
 
+const computeCustomPrice = (target, custom) => {
+    try {
+        custom['prices'].push({ value: parseFloat(target.find('td').last().html().trim().replace(',', '.')) })
+    } catch (e) {
+        console.warn('parse price error: ' + e)
+    }
+}
+
 const getRoundTrips = ($) => {
     const firstProductHeader = $('.product-header').first()
-    let roundTrips = []
-    firstProductHeader.siblings().map((i, sibling) => {
+    const roundTrips = [] //cound have been map reduce, better readability
+    const custom = { prices: [] }
+    computeCustomPrice(firstProductHeader, custom)
+    firstProductHeader.siblings().map((i, sibling) => { //brute force processing due to poor HTML structure :-(
         const element = $(sibling)
-        let target = false
-        target = tryToGet(element, 'product-travel-date')
+        let target = false // to avoid double get (could have been in a map), better readability
+        target = tryToGet(element, 'product-header') //get custom prices
+        if (target) {
+            computeCustomPrice(target, custom)
+        }
+        target = tryToGet(element, 'product-travel-date') //will be a new roundtrip then
         if (target) {
             roundTrips.push({})
         }
-        target = tryToGet(element, 'product-details')
+        target = tryToGet(element, 'product-details') //get a train
         if (target) {
-            roundTrips[roundTrips.length - 1]['type'] = target.find('.travel-way').html().trim()
+            roundTrips[roundTrips.length - 1]['type'] = (target.find('.travel-way') || '').html().trim()
             const train = {}
-            train['departureTime'] = target.find('.origin-destination-hour').html().replace('h', ':').trim()
-            train['departureStation'] = target.find('.origin-destination-station').html().trim()
+            train['departureTime'] = (target.find('.origin-destination-hour') || '').html().replace('h', ':').trim()
+            train['departureStation'] = (target.find('.origin-destination-station') || '').html().trim()
+            train['arrivalTime'] = (target.find('.origin-destination-border.origin-destination-hour') || '').html().replace('h', ':').trim()
+            train['arrivalStation'] = (target.find('.origin-destination-border.origin-destination-station') || '').html().trim()
+            train['type'] = (target.find('.segment').get(0).children[0].data || '').trim() //fragile 
+            train['number'] = (target.find('.segment').get(1).children[0].data || '').trim()
             roundTrips[roundTrips.length - 1]['trains'] = [train]
-            debugger
         }
     })
-    return roundTrips
+    return { roundTrips, custom }
 }
 
 const processHtmlTest = async (data) => {
@@ -62,9 +81,9 @@ const processHtmlTest = async (data) => {
         dataNoEscape = data.replace(/\\"/g, '"')
         const $ = cheerio.load(dataNoEscape)
         const { name, code } = getMainInfos($)
-        const roundTrips = getRoundTrips($)
+        const { roundTrips, custom } = getRoundTrips($)
         const details = { roundTrips }
-        const result = { trips: [{ code, name, details }] }
+        const result = { trips: [{ code, name, details }], custom }
         return { result }
     }
     catch (e) {
