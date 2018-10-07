@@ -2,16 +2,24 @@ const { onError } = require('../../utils/error')
 const { tryToGet, queryParser } = require('../../utils/dom')
 const moment = require('moment')
 
-const computeCustomPrice = (target, custom) => {
+const processSncfTest = async ($) => {
     try {
-        custom['prices'].push({ value: parseFloat(target.find('td').last().html().trim().replace(',', '.')) })
-    } catch (e) {
-        console.warn('parse price error: ' + e)
+        const { name, code } = getMainInfos($)
+        const { roundTrips, custom, price } = getRoundTripsInfo($)
+        const details = { price, roundTrips }
+        const result = { trips: [{ code, name, details }], custom }
+        return { result }
+    }
+    catch (e) {
+        onError(e, 'processSncfTest')
     }
 }
 
-const computeTotalPrice = (prices = {}) => {
-    return prices.reduce((acc, curr) => acc + curr.value, 0) //sum
+const getMainInfos = ($) => {
+    const firstPrimaryLink = $('.primary-link').first() //the HTML structure suggests one code by mail, so one trip by mail (can be easilu adapted if not)
+    const urlPrimary = firstPrimaryLink.attr('href')
+    const queryParsed = queryParser(urlPrimary)
+    return { name: queryParsed.ownerName, code: queryParsed.pnrRef }
 }
 
 const getRoundTripsInfo = ($) => {
@@ -54,11 +62,17 @@ const getRoundTripsInfo = ($) => {
     return { price: totalPrice, roundTrips, custom }
 }
 
-const getMainInfos = ($) => {
-    const firstPrimaryLink = $('.primary-link').first() //the HTML structure suggests one code by mail, so one trip by mail (can be easilu adapted if not)
-    const urlPrimary = firstPrimaryLink.attr('href')
-    const queryParsed = queryParser(urlPrimary)
-    return { name: queryParsed.ownerName, code: queryParsed.pnrRef }
+
+const computeCustomPrice = (target, custom) => {
+    try {
+        custom['prices'].push({ value: parseFloat(target.find('td').last().html().trim().replace(',', '.')) })
+    } catch (e) {
+        console.warn('parse price error: ' + e)
+    }
+}
+
+const computeTotalPrice = (prices = {}) => {
+    return prices.reduce((acc, curr) => acc + curr.value, 0) //sum
 }
 
 const getTransactionDate = ($) => {
@@ -66,19 +80,6 @@ const getTransactionDate = ($) => {
     let rawDate = node.html()
     rawDate = rawDate.substring(0, rawDate.indexOf('(')).trim()
     return moment(rawDate, 'DD Mo YYYY')
-}
-
-const processSncfTest = async ($) => {
-    try {
-        const { name, code } = getMainInfos($)
-        const { roundTrips, custom, price } = getRoundTripsInfo($)
-        const details = { price, roundTrips }
-        const result = { trips: [{ code, name, details }], custom }
-        return { result }
-    }
-    catch (e) {
-        onError(e, 'processSncfTest')
-    }
 }
 
 module.exports = {
